@@ -106,13 +106,27 @@ def upload():
             file.save(filepath)
 
             # Extract text based on file type
-            if filename.lower().endswith('.pdf'):
-                ocr_text = extract_from_pdf(filepath)
-            else:
-                ocr_text = extract_text_from_receipt(filepath)
+            try:
+                if filename.lower().endswith('.pdf'):
+                    ocr_text = extract_from_pdf(filepath)
+                else:
+                    ocr_text = extract_text_from_receipt(filepath)
 
-            if not ocr_text:
-                flash('Could not extract text from receipt', 'error')
+                if not ocr_text:
+                    flash('❌ Could not extract text from receipt. Please ensure the receipt is clear and readable.', 'error')
+                    return redirect(url_for('upload'))
+
+            except RuntimeError as ocr_error:
+                # Better error message for Tesseract issues
+                error_msg = str(ocr_error)
+                if "Tesseract" in error_msg or "tesseract" in error_msg:
+                    flash(
+                        f'⚠️ {error_msg}\n\n'
+                        f'Quick fix: Download Tesseract from https://github.com/UB-Mannheim/tesseract/wiki',
+                        'error'
+                    )
+                else:
+                    flash(f'❌ OCR Error: {error_msg}', 'error')
                 return redirect(url_for('upload'))
 
             # Analyze with Claude
@@ -132,7 +146,7 @@ def upload():
             return render_template('result.html', expense=session_data, categories=CATEGORIES)
 
         except Exception as e:
-            flash(f'Error processing receipt: {str(e)}', 'error')
+            flash(f'❌ Error processing receipt: {str(e)}', 'error')
             return redirect(url_for('upload'))
 
     return render_template('upload.html')
