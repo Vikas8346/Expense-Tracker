@@ -17,6 +17,16 @@ from core.claude_ai import analyze_receipt, generate_financial_advice
 # Load environment variables
 load_dotenv()
 
+# Configure Tesseract OCR path for Windows
+TESSERACT_PATH = r"C:\Program Files\Tesseract-OCR"
+if os.path.exists(TESSERACT_PATH):
+    os.environ['PATH'] = TESSERACT_PATH + os.pathsep + os.environ.get('PATH', '')
+    import pytesseract
+    pytesseract.pytesseract.pytesseract_cmd = os.path.join(TESSERACT_PATH, 'tesseract.exe')
+    print("[INFO] Tesseract OCR configured successfully")
+else:
+    print("[WARNING] Tesseract OCR not found at", TESSERACT_PATH)
+
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')

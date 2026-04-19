@@ -4,6 +4,11 @@ from PIL import Image
 import numpy as np
 import os
 import shutil
+import sys
+
+# Configure pytesseract to use Tesseract installation
+# Standard Windows installation path
+TESSERACT_PATH = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 # Check if Tesseract is installed
 TESSERACT_AVAILABLE = False
@@ -12,6 +17,14 @@ TESSERACT_CMD = None
 def check_tesseract():
     """Check if Tesseract is installed and accessible."""
     global TESSERACT_AVAILABLE, TESSERACT_CMD
+
+    # Try standard Windows path first
+    if os.path.exists(TESSERACT_PATH):
+        pytesseract.pytesseract.pytesseract_cmd = TESSERACT_PATH
+        TESSERACT_CMD = TESSERACT_PATH
+        TESSERACT_AVAILABLE = True
+        print(f"✓ Tesseract found at: {TESSERACT_PATH}")
+        return True
 
     # Common Windows installation paths
     paths = [
@@ -39,8 +52,10 @@ def check_tesseract():
             TESSERACT_CMD = path
             pytesseract.pytesseract.pytesseract_cmd = path
             TESSERACT_AVAILABLE = True
+            print(f"✓ Tesseract found at: {path}")
             return True
 
+    print("✗ Tesseract not found. Please install from: https://github.com/UB-Mannheim/tesseract/wiki")
     return False
 
 # Check on module load
