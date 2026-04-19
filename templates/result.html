@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Review Expense - AI Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Review & Edit</h1>
+    <p>Verify the extracted information before saving</p>
+</div>
+
+<div class="content-grid">
+    <div class="card">
+        <h2>Receipt Preview</h2>
+        {% if expense.image_path %}
+            <div style="margin-bottom: 1.5rem;">
+                <img src="{{ expense.image_path }}" alt="Receipt" style="max-width: 100%; border-radius: 8px; border: 0.5px solid var(--border);">
+            </div>
+        {% endif %}
+        <div style="padding: 1rem; background-color: var(--bg2); border-radius: 8px; margin-bottom: 1rem;">
+            <h3 style="margin-top: 0;">Extracted Text</h3>
+            <p style="white-space: pre-wrap; word-break: break-word; color: var(--text2); font-size: 0.875rem; max-height: 200px; overflow-y: auto;">{{ expense.ocr_text }}</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>AI Analysis Results</h2>
+        <form method="POST" action="{{ url_for('save') }}">
+            <div class="form-group">
+                <label for="merchant">Merchant Name *</label>
+                <input type="text" id="merchant" name="merchant" value="{{ expense.merchant }}" required class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label for="amount">Amount (₹) *</label>
+                <input type="number" id="amount" name="amount" value="{{ expense.amount }}" step="0.01" required class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <select id="category" name="category" required class="form-input">
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {% if expense.category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="date">Date (YYYY-MM-DD) *</label>
+                <input type="date" id="date" name="date" value="{{ expense.date }}" required class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label for="items">Items Purchased</label>
+                <textarea id="items" name="items" rows="3" class="form-input">{{ expense.items }}</textarea>
+                <small style="color: var(--text2);">Comma-separated list of items</small>
+            </div>
+
+            <input type="hidden" name="image_path" value="{{ expense.image_path }}">
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Expense</button>
+                <a href="{{ url_for('upload') }}" class="btn btn-secondary">Upload Another</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 0.5px solid var(--border);
+        border-radius: 8px;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 1rem;
+        color: var(--text);
+        background-color: white;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background-color: white;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 0.5px solid var(--border);
+    }
+
+    .btn {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark, #4c1d95);
+    }
+
+    .btn-secondary {
+        background-color: var(--bg2);
+        color: var(--text);
+        border: 0.5px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+        background-color: var(--bg3);
+    }
+</style>
+{% endblock %}

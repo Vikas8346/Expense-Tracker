@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Home - AI Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Dashboard</h1>
+    <p>Track and analyze your spending with AI</p>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <div class="metric-label">Total Spent</div>
+        <div class="metric-value">₹{{ "%.2f"|format(metrics.total_spent) }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">This Month</div>
+        <div class="metric-value">₹{{ "%.2f"|format(metrics.this_month) }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Transactions</div>
+        <div class="metric-value">{{ metrics.transactions }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Top Category</div>
+        <div class="metric-value">{{ metrics.top_category.category }}</div>
+        <div class="metric-subtitle">₹{{ "%.2f"|format(metrics.top_category.amount) }}</div>
+    </div>
+</div>
+
+<div class="content-grid">
+    <div class="card">
+        <h2>Spending by Category</h2>
+        <div class="category-chart-container">
+            <div class="category-bars">
+                {% for cat in categories %}
+                    <div class="category-item">
+                        <div class="category-label">
+                            <span class="category-name">{{ cat.name }}</span>
+                            <span class="category-amount">₹{{ "%.2f"|format(cat.amount) }}</span>
+                        </div>
+                        <div class="category-track">
+                            <div class="category-fill" style="width: {% if cat.amount > 0 %}{{ (cat.amount / (categories|map(attribute='amount')|max or 1) * 100) }}{% else %}0{% endif %}%; background-color: {{ cat.color }};" title="{{ cat.name }}: ₹{{ "%.2f"|format(cat.amount) }}"></div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Recent Transactions</h2>
+        {% if recent_expenses %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Merchant</th>
+                            <th>Category</th>
+                            <th>Date</th>
+                            <th class="text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in recent_expenses %}
+                            <tr>
+                                <td>{{ expense.merchant }}</td>
+                                <td>
+                                    <span class="badge" style="background-color: {{ categories | selectattr('name', 'equalto', expense.category) | map(attribute='color') | first or '#888780' }}; color: white;">
+                                        {{ expense.category }}
+                                    </span>
+                                </td>
+                                <td>{{ expense.date }}</td>
+                                <td class="text-right">₹{{ "%.2f"|format(expense.amount) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('expenses') }}" class="btn btn-secondary">View All Expenses</a>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>No expenses yet. <a href="{{ url_for('upload') }}">Upload a receipt</a> to get started.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

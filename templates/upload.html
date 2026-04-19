@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Receipt - AI Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Upload Receipt</h1>
+    <p>Upload your receipt image or PDF. Our AI will automatically extract expenses.</p>
+</div>
+
+<div class="card" style="max-width: 600px; margin: 2rem auto;">
+    <form method="POST" enctype="multipart/form-data" id="uploadForm">
+        <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">📸</div>
+            <h3>Drop receipt here or click to browse</h3>
+            <p>Supported formats: JPG, PNG, PDF (Max 16MB)</p>
+            <input type="file" id="fileInput" name="file" accept=".jpg,.jpeg,.png,.pdf" hidden>
+        </div>
+
+        <div id="processing" class="processing-state" style="display: none; text-align: center; padding: 2rem;">
+            <div class="spinner"></div>
+            <p>Processing receipt...</p>
+            <p style="font-size: 0.875rem; color: var(--text2);">Extracting text with OCR and analyzing with Claude AI...</p>
+        </div>
+
+        <div id="fileSelected" style="display: none; padding: 1rem; background-color: var(--bg2); border-radius: 8px; margin-bottom: 1rem;">
+            <p><strong>Selected:</strong> <span id="fileName"></span></p>
+        </div>
+
+        <div id="buttons" style="display: flex; gap: 1rem; justify-content: center;">
+            <button type="submit" class="btn btn-primary" id="submitBtn">Analyze Receipt</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .upload-zone {
+        border: 2px dashed var(--border);
+        border-radius: 12px;
+        padding: 3rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .upload-zone:hover {
+        border-color: var(--primary);
+        background-color: var(--bg2);
+    }
+
+    .upload-zone.dragover {
+        border-color: var(--primary);
+        background-color: var(--bg2);
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .upload-zone h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--text);
+    }
+
+    .upload-zone p {
+        color: var(--text2);
+        margin: 0;
+    }
+
+    .spinner {
+        border: 3px solid var(--border);
+        border-top: 3px solid var(--primary);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .processing-state p {
+        margin: 0.5rem 0;
+    }
+</style>
+
+<script>
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileSelected = document.getElementById('fileSelected');
+    const fileName = document.getElementById('fileName');
+    const uploadForm = document.getElementById('uploadForm');
+    const processing = document.getElementById('processing');
+    const buttons = document.getElementById('buttons');
+
+    // Click to upload
+    uploadZone.addEventListener('click', () => fileInput.click());
+
+    // Drag and drop
+    uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+        fileInput.files = e.dataTransfer.files;
+        updateFileDisplay();
+    });
+
+    fileInput.addEventListener('change', updateFileDisplay);
+
+    function updateFileDisplay() {
+        if (fileInput.files.length > 0) {
+            fileName.textContent = fileInput.files[0].name;
+            fileSelected.style.display = 'block';
+        } else {
+            fileSelected.style.display = 'none';
+        }
+    }
+
+    uploadForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (fileInput.files.length === 0) {
+            alert('Please select a file');
+            return;
+        }
+
+        uploadZone.style.display = 'none';
+        fileSelected.style.display = 'none';
+        buttons.style.display = 'none';
+        processing.style.display = 'block';
+
+        uploadForm.submit();
+    });
+</script>
+{% endblock %}

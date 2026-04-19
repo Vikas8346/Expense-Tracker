@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Financial Dashboard</h1>
+    <p>Visualize your spending patterns</p>
+</div>
+
+<div class="content-grid">
+    <div class="card">
+        <h2>Spending by Category (Doughnut)</h2>
+        <div style="position: relative; height: 400px;">
+            <canvas id="doughnutChart"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Category Breakdown (Bar)</h2>
+        <div style="position: relative; height: 400px;">
+            <canvas id="barChart"></canvas>
+        </div>
+    </div>
+
+    <div class="card" style="grid-column: 1 / -1;">
+        <h2>Monthly Trend (Line)</h2>
+        <div style="position: relative; height: 300px;">
+            <canvas id="lineChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chartData = {{ chart_data|tojson }};
+    const monthlyData = {{ monthly_data|tojson }};
+
+    // Color scheme
+    const colors = chartData.colors;
+
+    // Doughnut Chart
+    new Chart(document.getElementById('doughnutChart'), {
+        type: 'doughnut',
+        data: {
+            labels: chartData.categories,
+            datasets: [{
+                data: chartData.amounts,
+                backgroundColor: colors,
+                borderColor: 'white',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ₹' + context.parsed.toLocaleString('en-IN', {minimumFractionDigits: 2});
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Bar Chart
+    new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+            labels: chartData.categories,
+            datasets: [{
+                label: 'Amount Spent (₹)',
+                data: chartData.amounts,
+                backgroundColor: colors,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: { padding: 15 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '₹' + context.parsed.x.toLocaleString('en-IN', {minimumFractionDigits: 2});
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString('en-IN');
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Line Chart
+    new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+            labels: monthlyData.months,
+            datasets: [{
+                label: 'Monthly Spending (₹)',
+                data: monthlyData.amounts,
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#667eea',
+                pointBorderColor: 'white',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: { padding: 15 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '₹' + context.parsed.y.toLocaleString('en-IN', {minimumFractionDigits: 2});
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString('en-IN');
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+<style>
+    .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

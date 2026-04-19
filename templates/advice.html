@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Financial Advice - AI Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>AI Financial Advice</h1>
+    <p>Personalized money-saving tips based on your spending</p>
+</div>
+
+<div class="content-grid">
+    <div class="card">
+        <h2>💡 Money-Saving Tips</h2>
+        <div class="tips-list">
+            {% for tip in tips %}
+                <div class="tip-item">
+                    <span class="tip-number">{{ loop.index }}</span>
+                    <p>{{ tip }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Budget vs Actual</h2>
+        <div class="budget-tracker">
+            {% for item in budget_data %}
+                <div class="budget-item">
+                    <div class="budget-header">
+                        <span class="budget-category">{{ item.category }}</span>
+                        <span class="budget-amounts">
+                            ₹{{ "%.0f"|format(item.actual) }} / ₹{{ "%.0f"|format(item.budget) }}
+                        </span>
+                    </div>
+                    <div class="budget-bar">
+                        <div class="budget-fill"
+                             style="width: {{ item.percentage }}%; background-color: {{ item.color }};"
+                             title="{{ item.category }}: {{ "%.0f"|format(item.percentage) }}% used">
+                        </div>
+                    </div>
+                    <div class="budget-status">
+                        {% if item.percentage < 50 %}
+                            <span style="color: #10b981;">✓ Under budget</span>
+                        {% elif item.percentage < 100 %}
+                            <span style="color: #f59e0b;">⚠ Nearing limit</span>
+                        {% else %}
+                            <span style="color: #ef4444;">✕ Over budget</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+    }
+
+    .tips-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .tip-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        background-color: var(--bg2);
+        border-radius: 8px;
+        border-left: 4px solid var(--primary);
+    }
+
+    .tip-number {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background-color: var(--primary);
+        color: white;
+        border-radius: 50%;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    .tip-item p {
+        margin: 0;
+        color: var(--text);
+        line-height: 1.6;
+    }
+
+    .budget-tracker {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .budget-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .budget-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.95rem;
+    }
+
+    .budget-category {
+        font-weight: 500;
+        color: var(--text);
+    }
+
+    .budget-amounts {
+        color: var(--text2);
+        font-size: 0.85rem;
+    }
+
+    .budget-bar {
+        width: 100%;
+        height: 8px;
+        background-color: var(--bg2);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .budget-fill {
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+
+    .budget-status {
+        font-size: 0.8rem;
+        text-align: right;
+    }
+
+    @media (max-width: 768px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
