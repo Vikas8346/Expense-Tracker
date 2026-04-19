@@ -1,0 +1,15 @@
+.git
+.gitignore
+.env.example
+venv
+__pycache__
+*.pyc
+*.pyo
+*.db
+static/uploads
+.DS_Store
+.pytest_cache
+*.log
+node_modules
+npm-debug.log
+README.md
