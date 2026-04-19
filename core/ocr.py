@@ -23,7 +23,7 @@ def check_tesseract():
         pytesseract.pytesseract.pytesseract_cmd = TESSERACT_PATH
         TESSERACT_CMD = TESSERACT_PATH
         TESSERACT_AVAILABLE = True
-        print(f"✓ Tesseract found at: {TESSERACT_PATH}")
+        print("[OK] Tesseract found at:", TESSERACT_PATH)
         return True
 
     # Common Windows installation paths
@@ -52,10 +52,10 @@ def check_tesseract():
             TESSERACT_CMD = path
             pytesseract.pytesseract.pytesseract_cmd = path
             TESSERACT_AVAILABLE = True
-            print(f"✓ Tesseract found at: {path}")
+            print("[OK] Tesseract found at:", path)
             return True
 
-    print("✗ Tesseract not found. Please install from: https://github.com/UB-Mannheim/tesseract/wiki")
+    print("[WARNING] Tesseract not found. Please install from: https://github.com/UB-Mannheim/tesseract/wiki")
     return False
 
 # Check on module load
