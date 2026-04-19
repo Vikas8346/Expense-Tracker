@@ -17,24 +17,37 @@ from core.claude_ai import analyze_receipt, generate_financial_advice
 # Load environment variables
 load_dotenv()
 
-# Configure Tesseract OCR path for Windows
-TESSERACT_PATH = r"C:\Program Files\Tesseract-OCR"
-if os.path.exists(TESSERACT_PATH):
-    os.environ['PATH'] = TESSERACT_PATH + os.pathsep + os.environ.get('PATH', '')
-    import pytesseract
-    pytesseract.pytesseract.pytesseract_cmd = os.path.join(TESSERACT_PATH, 'tesseract.exe')
-    print("[INFO] Tesseract OCR configured successfully")
+# Configure Tesseract OCR path for Windows (only if not on Vercel)
+DISABLE_TESSERACT = os.getenv('DISABLE_TESSERACT', 'false').lower() == 'true'
+
+if not DISABLE_TESSERACT:
+    TESSERACT_PATH = r"C:\Program Files\Tesseract-OCR"
+    if os.path.exists(TESSERACT_PATH):
+        os.environ['PATH'] = TESSERACT_PATH + os.pathsep + os.environ.get('PATH', '')
+        import pytesseract
+        pytesseract.pytesseract.pytesseract_cmd = os.path.join(TESSERACT_PATH, 'tesseract.exe')
+        print("[INFO] Tesseract OCR configured successfully")
+    else:
+        print("[WARNING] Tesseract OCR not found at", TESSERACT_PATH)
 else:
-    print("[WARNING] Tesseract OCR not found at", TESSERACT_PATH)
+    print("[INFO] Running on Vercel - Tesseract OCR disabled")
 
 # Initialize Flask app
-app = Flask(__name__)
+app = Flask(__name__,
+           template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
+           static_folder=os.path.join(os.path.dirname(__file__), 'static'))
+
+# Get absolute paths for Vercel compatibility
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'expense_tracker.db')
+UPLOAD_FOLDER_PATH = os.path.join(BASE_DIR, 'static', 'uploads')
+
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///expense_tracker.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Upload configuration
-UPLOAD_FOLDER = 'static/uploads'
+UPLOAD_FOLDER = UPLOAD_FOLDER_PATH
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'pdf'}
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
