@@ -6,6 +6,9 @@ import os
 import shutil
 import sys
 
+# Check if Tesseract is disabled (e.g., on Vercel)
+DISABLE_TESSERACT = os.getenv('DISABLE_TESSERACT', 'false').lower() == 'true'
+
 # Configure pytesseract to use Tesseract installation
 # Standard Windows installation path
 TESSERACT_PATH = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -17,6 +20,11 @@ TESSERACT_CMD = None
 def check_tesseract():
     """Check if Tesseract is installed and accessible."""
     global TESSERACT_AVAILABLE, TESSERACT_CMD
+
+    if DISABLE_TESSERACT:
+        print("[INFO] Tesseract disabled in this environment")
+        TESSERACT_AVAILABLE = False
+        return False
 
     # Try standard Windows path first
     if os.path.exists(TESSERACT_PATH):
