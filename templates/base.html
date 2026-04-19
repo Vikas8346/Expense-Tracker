@@ -29,6 +29,9 @@
                 <a href="{{ url_for('advice') }}" class="nav-link {% if request.endpoint == 'advice' %}active{% endif %}">
                     Financial Advice
                 </a>
+                <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode">
+                    <span id="themeIcon">🌙</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -53,6 +56,61 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        // Initialize theme on page load
+        function initializeTheme() {
+            // Get saved theme from localStorage or use system preference
+            let theme = localStorage.getItem('theme');
+
+            if (!theme) {
+                // Check system preference
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    theme = 'dark';
+                } else {
+                    theme = 'light';
+                }
+            }
+
+            // Apply theme
+            applyTheme(theme);
+        }
+
+        function applyTheme(theme) {
+            const html = document.documentElement;
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+
+            if (theme === 'dark') {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.textContent = '☀️';
+                themeToggle.title = 'Switch to light mode';
+            } else {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeIcon.textContent = '🌙';
+                themeToggle.title = 'Switch to dark mode';
+            }
+        }
+
+        // Toggle theme on button click
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    const html = document.documentElement;
+                    const currentTheme = html.getAttribute('data-theme');
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    applyTheme(newTheme);
+                });
+            }
+        });
+    </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>
